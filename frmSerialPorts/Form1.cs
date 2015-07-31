@@ -233,5 +233,13 @@ namespace frmSerialPorts
             }
 
         }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (com != null)
+            {
+                com.Close();
+            }
+        }
     }
 }

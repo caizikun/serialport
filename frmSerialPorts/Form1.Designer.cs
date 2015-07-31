@@ -48,7 +48,6 @@
             this.serialPort1 = new System.IO.Ports.SerialPort(this.components);
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
-            this.cboxComm = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // label1
@@ -216,20 +215,11 @@
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
-            // cboxComm
-            // 
-            this.cboxComm.FormattingEnabled = true;
-            this.cboxComm.Location = new System.Drawing.Point(125, 319);
-            this.cboxComm.Name = "cboxComm";
-            this.cboxComm.Size = new System.Drawing.Size(121, 20);
-            this.cboxComm.TabIndex = 18;
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(674, 404);
-            this.Controls.Add(this.cboxComm);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.lblmsg0);
@@ -250,6 +240,7 @@
             this.Controls.Add(this.label1);
             this.Name = "Form1";
             this.Text = "Form1";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -277,7 +268,6 @@
         public System.IO.Ports.SerialPort serialPort1;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.ComboBox cboxComm;
     }
 }
 
