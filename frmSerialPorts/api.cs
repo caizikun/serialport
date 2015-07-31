@@ -197,8 +197,53 @@ System.Text.Encoding.Default.GetString(_byteData.ToArray(), 0, _byteData.Count);
             if (!(_frm.serialPort1.IsOpen))
             {
                 _frm.serialPort1.Open();
-                _frm.serialPort1.Write(msg,offset, count);
+                _frm.serialPort1.Write(msg, offset, count);
             }
+        }
+        public static void commSetSerialPara<T>(ComboBox obj, object indexOrText, bool isMenuint)
+        {
+            try
+            {
+                obj.Items.Clear();
+                foreach (T item in Enum.GetValues(typeof(T)))
+                {
+                    if (isMenuint)
+                    {
+                        obj.Items.Add(Convert.ToInt32(item).ToString());
+
+                    }
+                    else
+                    {
+                        obj.Items.Add(item.ToString());
+                    }
+
+                }
+                var tmptype = indexOrText.GetType();
+                if (tmptype.ToString().Equals("System.Int32"))
+                {
+                    obj.SelectedIndex = Convert.ToInt32(indexOrText);
+                }
+                else if (tmptype.ToString().Equals("System.String"))
+                {
+                    obj.SelectedText = indexOrText.ToString();
+                }
+                //MessageBox.Show(tmptype.ToString());
+            }
+            catch (Exception ex)
+            {
+
+                MessageBox.Show(ex.Message);
+            }
+
+        }
+        public static void commSetSerialPara(ComboBox obj, string[] strs, int index)
+        {
+            obj.Items.Clear();
+            foreach (string str in strs)
+            {
+                obj.Items.Add(str);
+            }
+            obj.SelectedIndex = index;
         }
         /// <summary>
         /// 设置串口号
