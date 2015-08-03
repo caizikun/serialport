@@ -6,8 +6,15 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using System.IO.Ports;
 using System.Text.RegularExpressions;
+
+using System.IO.Ports;
+using System.Net;
+using System.Net.Sockets;
+using System.Threading;
+using Modbus.Data;
+using Modbus.Device;
+using Modbus.Utility;
 
 namespace frmSerialPorts
 {
@@ -32,10 +39,12 @@ namespace frmSerialPorts
         }
         public void initData()
         {
-            api.commSetSerialPara(cbox0PortName, SerialPort.GetPortNames(), 0);
-            api.commSetSerialPara<SerialPortBaudRates>(cbox1BaudRate, "115200", true);
-            //init
-            comm = new SerialPort();
+            api.commSetSerialPara(cbox0PortName, SerialPort.GetPortNames(), 2);
+            api.commSetSerialPara<SerialPortBaudRates>(cbox1BaudRate, "9600", true);
+            api.commSetSerialPara<SerialPortDatabits>(cbox2DataBits, "8", true);
+            api.commSetSerialPara<Parity>(cbox3Parity, 0, false);
+            api.commSetSerialPara<StopBits>(cbox4StopBits, 1, false);
+          
             //comm.NewLine = "/r/n";
             //comm.RtsEnable = true;
             //even
@@ -100,6 +109,12 @@ namespace frmSerialPorts
 
         private void btn0Open_Click(object sender, EventArgs e)
         {
+            if (comm==null)
+            {
+                //init
+                comm = new SerialPort();
+            }
+
             if (comm.IsOpen)
             {
                 _closing = true;
@@ -153,7 +168,7 @@ namespace frmSerialPorts
 
                     foreach (Match item in mc)
                     {
-                        buf.Add(byte.Parse(item.Value,System.Globalization.NumberStyles.HexNumber));
+                        buf.Add(byte.Parse(item.Value, System.Globalization.NumberStyles.HexNumber));
                     }
 
                     comm.Write(buf.ToArray(), 0, buf.Count);
@@ -201,5 +216,70 @@ namespace frmSerialPorts
             txt0Rece.Text = "";
             txt1Send.Text = "";
         }
+
+        private void btn5GetSalve_Click(object sender, EventArgs e)
+        {
+            while (_closing)
+            {
+                Application.DoEvents();
+            }
+            using (SerialPort port = new SerialPort(cbox0PortName.Text))
+            {
+                _closing = true;
+                btn5GetSalve.Enabled = false;
+                port.BaudRate = int.Parse(cbox1BaudRate.Text);
+                port.DataBits = int.Parse(cbox2DataBits.Text);
+                port.Parity = (Parity)Enum.Parse(typeof(Parity), cbox3Parity.Text);
+                port.StopBits = (StopBits)Enum.Parse(typeof(StopBits), cbox4StopBits.Text);
+
+
+                try
+                {
+                    port.Open();
+
+                    master = ModbusSerialMaster.CreateRtu(port);
+                    byte slaveId = 1;
+                    ushort startAddress = 0;
+                    ushort numRegisters = 10;
+
+                    //read ten registers;
+                    // ushort[]  registers =   master.ReadHoldingRegisters(slaveId, startAddress, numRegisters);
+
+                    var registers = master.ReadHoldingRegisters(slaveId, startAddress, numRegisters);
+                    for (int i = 0; i < numRegisters; i++)
+                    {
+                        var data = "Register " + startAddress + i + "=" + registers[i] + "\r\n";
+                        this.Invoke((EventHandler)(delegate
+                        {
+                            txt0Rece.Multiline = true;
+                            txt0Rece.WordWrap = true;
+                            txt0Rece.AppendText(data);
+                        }));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _closing = false;
+                    MessageBox.Show(ex.Message);
+
+                    if (comm!=null)
+                    {
+                        btn0Open_Click(sender, e);
+                    }
+                    //throw;
+                }
+                finally
+                {
+                    btn5GetSalve.Enabled = true;
+                    _closing = false;
+                }
+            }
+
+
+
+        }
+
+
+        public IModbusSerialMaster master { get; set; }
     }
 }
